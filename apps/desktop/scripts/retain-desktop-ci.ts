@@ -2,6 +2,7 @@
 import { appendFile, readFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { desktopTargetBuildPaths, resolveDesktopBuildTarget } from './desktop-build-paths.mjs'
+import type { DesktopReleaseTargetName } from './package-target.ts'
 import { desktopReleasesRoot } from '@deepseek-ai/dsh-desktop-publisher/desktop-releases-root.ts'
 import { desktopBuildRecordFilename, desktopUpdateMetadataFilename, resolveDesktopUpdateChannel } from '@deepseek-ai/dsh-desktop-publisher/desktop-auto-update-environment.mjs'
 import { loadDesktopPackageEnvironment } from './desktop-package-environment.mjs'
@@ -24,7 +25,8 @@ function required(env: NodeJS.ProcessEnv, name: string): string {
  * @returns The exact label used by the later GitHub archival job.
  */
 export function resolveDesktopRetentionRunner(env: NodeJS.ProcessEnv): string {
-  const target = resolveDesktopBuildTarget(env)
+  // CI packaging runners only ever build update-publishing targets; Linux never enters this flow.
+  const target = resolveDesktopBuildTarget(env) as DesktopReleaseTargetName
   const routes = desktopPublishRunnersSchema.parse(JSON.parse(required(env, 'DESKTOP_PUBLISH_RUNNERS')))
   const route = routes[required(env, 'RUNNER_NAME')]
   if (!route || !route.target.includes(target)
@@ -41,7 +43,7 @@ export function resolveDesktopRetentionRunner(env: NodeJS.ProcessEnv): string {
  * @returns Retained directory, including explicitly qualified debugging packages.
  */
 export async function retainDesktopCi(env: NodeJS.ProcessEnv, appRoot = resolve(import.meta.dirname, '..')): Promise<string> {
-  const target = resolveDesktopBuildTarget(env)
+  const target = resolveDesktopBuildTarget(env) as DesktopReleaseTargetName
   const runnerLabel = resolveDesktopRetentionRunner(env)
   const windows = target === 'win-x64'
   const platform = windows ? 'win32' : 'darwin'

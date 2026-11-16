@@ -1019,7 +1019,7 @@ it('derives the client headers independently for profile, balance, and logout ca
 
 it('rejects unsupported native desktop platforms in configuration', () => {
   // @ts-expect-error Configuration files can name unsupported operating systems.
-  expect(() => DeepSeekAccount.Config({ desktopPlatform: 'linux' })).toThrow()
+  expect(() => DeepSeekAccount.Config({ desktopPlatform: 'freebsd' })).toThrow()
 })
 
 it('retains successful profile data on current failure only for the same credential', async () => {

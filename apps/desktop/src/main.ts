@@ -529,7 +529,7 @@ async function main(): Promise<void> {
     return next.promise
   }
   const platformView = new DesktopPlatformView(join(app.getAppPath(), 'lib', 'preload-platform-account.cjs'),
-    () => locale.id === 'zh-CN' ? 'zh_CN' : 'en_US', process.platform === 'win32' ? 'win32' : 'darwin',
+    () => locale.id === 'zh-CN' ? 'zh_CN' : 'en_US', process.platform === 'win32' ? 'win32' : process.platform === 'linux' ? 'linux' : 'darwin',
     owner => isMandatory() || updateOverlays.input(owner).blocked)
   const backend = new DesktopBackendController((onFailure) => {
     const hostInspectPort = developmentHostInspectPort(development)
@@ -1561,7 +1561,7 @@ async function main(): Promise<void> {
     if (!['win32', 'darwin'].includes(process.platform) || !['x64', 'arm64'].includes(process.arch)) throw new Error('desktop policy: unsupported platform')
     let wasBlocking = false
     mandatoryPolicy = new DesktopMandatoryUpdatePolicy(policyConfig, {
-      platform: process.platform as 'win32' | 'darwin', arch: process.arch as 'x64' | 'arm64',
+      platform: process.platform as 'win32' | 'darwin' | 'linux', arch: process.arch as 'x64' | 'arm64',
       get channel() { return updates.selectedChannel },
       bundledDshVersion: app.isPackaged ? readDesktopRuntime(resources.dsh).release.version : app.getVersion(),
     }, (state) => {
